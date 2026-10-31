@@ -1,0 +1,63 @@
+@using System.Globalization
+@implements IDisposable
+@inject SettingsService Settings
+
+<h4>@UiText.T("Live Cube Radar")</h4>
+<label class="check"><input id="live-cube-radar-enabled" type="checkbox" checked="@Settings.Current.LiveCubeRadarEnabled" disabled="@(Disabled || _saving)" @onchange="@(e => Save(() => Settings.SetLiveCubeRadarEnabled(e.Value is true)))" />@UiText.T("Hidden Cubes live auf Minimap und Karte anzeigen")</label>
+<p>@UiText.T("Erkennt Hidden Cubes in deiner Nähe über den mitgelesenen Netzwerkverkehr und zeigt sie mit Entfernung und Höhe auf demselben Overlay wie die Cube-Spots. Rot: sichtbar, orange gestrichelt: außer Sicht, gelb: wird geöffnet, grau: geöffnet oder weg.")</p>
+<label class="check"><input id="live-cube-alarm-enabled" type="checkbox" checked="@Settings.Current.LiveCubeAlarmEnabled" disabled="@(Disabled || _saving || !Settings.Current.LiveCubeRadarEnabled)" @onchange="@(e => Save(() => Settings.SetLiveCubeAlarmEnabled(e.Value is true)))" />@UiText.T("Alarmton bei jedem neuen Cube")</label>
+<label for="live-cube-alarm-volume">@UiText.T("Lautstärke")<input id="live-cube-alarm-volume" type="range" min="0" max="100" step="1" value="@Settings.Current.LiveCubeAlarmVolume" disabled="@(Disabled || _saving || !Settings.Current.LiveCubeRadarEnabled || !Settings.Current.LiveCubeAlarmEnabled)" @onchange="ChangeVolume" /><output for="live-cube-alarm-volume">@Settings.Current.LiveCubeAlarmVolume %</output></label>
+<button type="button" class="btn" id="live-cube-alarm-preview" disabled="@(Disabled || _saving || Settings.Current.LiveCubeAlarmVolume <= 0)" @onclick="PreviewSound">@UiText.T("Ton testen")</button>
+@if (LiveHiddenCubeService.Current?.Status is { } status)
+{
+    <p id="live-cube-radar-status" role="status">@StatusText(status)</p>
+}
+<p>@UiText.T("Benötigt das Netzwerk-Tracking (Npcap). Bestätigt in Verteron; in anderen Gebieten lernt das Radar die Cube-Kennung beim Öffnen mit einem Schlüssel oder an bekannten Cube-Spots selbst.")</p>
+@if (_feedback is not null) { <p role="status" aria-live="polite">@_feedback</p> }
+
+@code {
+    [Parameter] public bool Disabled { get; set; }
+    private bool _saving;
+    private string? _feedback;
+
+    protected override void OnInitialized()
+    {
+        if (LiveHiddenCubeService.Current is { } radar) radar.Changed += Refresh;
+    }
+
+    private void Refresh() => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        if (LiveHiddenCubeService.Current is { } radar) radar.Changed -= Refresh;
+    }
+
+    private static string StatusText(LiveCubeRadarStatus status)
+    {
+        if (!status.Enabled) return UiText.T("Live Cube Radar ist aus.");
+        if (!status.NetworkRunning) return UiText.T("Wartet auf das Netzwerk-Tracking.");
+        var text = UiText.F("{0} Cubes in Sicht, {1} außer Sicht · {2} bekannte Cube-Kennungen", status.Visible, status.OutOfView, status.Templates);
+        return status.MapCalibrated ? text : text + " · " + UiText.T("Für die aktuelle Karte fehlt die Umrechnung der Spielkoordinaten.");
+    }
+
+    private async Task Save(Action change)
+    {
+        if (Disabled || _saving) return;
+        _saving = true;
+        _feedback = UiText.T("Wird gespeichert …");
+        try { await Task.Run(change); _feedback = UiText.T("Overlay-Einstellungen gespeichert."); }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        { _feedback = UiText.T("Overlay-Einstellungen konnten nicht gespeichert werden."); }
+        finally { _saving = false; }
+    }
+
+    private Task ChangeVolume(ChangeEventArgs e) => int.TryParse(e.Value?.ToString(), NumberStyles.Integer,
+        CultureInfo.InvariantCulture, out var volume) ? Save(() => Settings.SetLiveCubeAlarmVolume(volume)) : Task.CompletedTask;
+
+    private void PreviewSound()
+    {
+        if (Disabled || _saving) return;
+        var volume = Settings.Current.LiveCubeAlarmVolume;
+        _ = Task.Run(() => LiveHiddenCubeService.Preview(volume));
+    }
+}

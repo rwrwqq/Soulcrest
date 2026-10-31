@@ -66,6 +66,12 @@ public sealed class AppSettings
     public bool AbyssRankReducedMotion { get; set; }
     public bool AbyssRankSoundEnabled { get; set; } = true;
     public double AbyssRankSoundVolume { get; set; } = .6;
+    /// <summary>Live Hidden Cube radar (port of Cube Radar, GPL-3.0): cubes read from the network stream on the minimap overlay.</summary>
+    public bool LiveCubeRadarEnabled { get; set; } = true;
+    /// <summary>Beep when the live radar sees a new Hidden Cube.</summary>
+    public bool LiveCubeAlarmEnabled { get; set; } = true;
+    /// <summary>Alarm volume 0–100 %.</summary>
+    public int LiveCubeAlarmVolume { get; set; } = 70;
     public bool AbyssKillFeedEnabled { get; set; } = true;
     public bool AbyssKillFeedShowKills { get; set; } = true;
     public bool AbyssKillFeedShowDeaths { get; set; }
@@ -629,6 +635,12 @@ public sealed class SettingsService
         () => Current.AbyssRankSoundEnabled, value => Current.AbyssRankSoundEnabled = value, enabled);
     public void SetAbyssRankSoundVolume(double volume) => SetDropOption(
         () => Current.AbyssRankSoundVolume, value => Current.AbyssRankSoundVolume = value, NormalizeAbyssRankSoundVolume(volume));
+    public void SetLiveCubeRadarEnabled(bool enabled) => SetDropOption(
+        () => Current.LiveCubeRadarEnabled, value => Current.LiveCubeRadarEnabled = value, enabled);
+    public void SetLiveCubeAlarmEnabled(bool enabled) => SetDropOption(
+        () => Current.LiveCubeAlarmEnabled, value => Current.LiveCubeAlarmEnabled = value, enabled);
+    public void SetLiveCubeAlarmVolume(int volume) => SetDropOption(
+        () => Current.LiveCubeAlarmVolume, value => Current.LiveCubeAlarmVolume = value, Math.Clamp(volume, 0, 100));
     public void SetAbyssKillFeedEnabled(bool enabled) => SetDropOption(
         () => Current.AbyssKillFeedEnabled, value => Current.AbyssKillFeedEnabled = value, enabled);
     public void SetAbyssKillFeedShowKills(bool enabled) => SetDropOption(

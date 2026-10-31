@@ -90,3 +90,18 @@ Die zusätzlichen Reset-/Timer-/Boss-Ersatzsymbole sind eigene Soulcrest-Grafike
 (`scripts/sound/generate_loot_drop.py`): ein kurzer, nach oben gleitender Sinuston mit
 leisem Oberton und gefiltertem Anschlag. Es werden keine fremden Aufnahmen oder Samples
 verwendet.
+
+## Cube Radar – Live-Erkennung versteckter Kuben (2026-10-31)
+
+Die Live-Cube-Erkennung und der Alarmton sind portiert aus **Cube Radar** von dr89mh
+(https://github.com/dr89mh/aion2-cube-radar), lizenziert unter der **GNU General Public License v3.0**:
+Objekt-Records (`ObjectMessages.cs`, `Wire.cs`, dieses wiederum abgeleitet von
+cyberbadger6969/aion2-dps-meter, GPL-3.0), Cube-Statuslogik (`RadarEngine.cs`), Cube-Signaturen
+(`config/cubes.json`), Zweiton-Piepton (`WavVolume.cs`, `CubeSound.cs`) sowie die Testframes aus
+`fixtures/cubes/`. Betroffene Dateien tragen einen Herkunftshinweis im Kopf:
+`src/Soulcrest.Core/Network/HiddenCubes/*`, `src/Soulcrest.App/Services/HiddenCubeSound.cs`,
+`tests/Soulcrest.Core.Tests/HiddenCubeRadarTests.cs`. Lizenztext: https://www.gnu.org/licenses/gpl-3.0.txt
+
+Hinweis: GPL-3.0 und die PolyForm-Noncommercial-Lizenz von Soulcrest sind nicht miteinander
+vereinbar. Ein Build mit diesen Dateien ist für die private Nutzung gedacht und darf nicht
+weiterverbreitet werden, solange beide Rechteinhaber nichts anderes erlauben.

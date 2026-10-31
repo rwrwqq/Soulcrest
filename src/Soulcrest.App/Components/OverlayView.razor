@@ -122,6 +122,7 @@
                     break;
                 case "map":
                     <section class="overlay-settings-card"><h4>@UiText.T("Karteninhalt")</h4><label class="check"><input id="map-overlay-routes" type="checkbox" checked="@Settings.Current.ShowRoutesInGame" @onchange="@(e => Save(s => s.ShowRoutesInGame = e.Value is true))" />@UiText.T("Linien zu Zielen")</label><p id="map-layers-legend-hint">@UiText.T("Kartensymbole wählst du im Karten-Tab in der Legende getrennt für interaktive Karte, Minimap und Weltkarte.")</p><button type="button" class="btn" @onclick="@(() => Ui.Navigate("map"))">@UiText.T("Kartenlegende öffnen") ↗</button></section>
+                    <section class="overlay-settings-card"><LiveCubeRadarSettings Disabled="@_saving" /></section>
                     <section class="overlay-settings-card"><h4>@UiText.T("Gefahrenzonen der Wachen")</h4><div class="overlay-visibility-options">@foreach (var map in GuardMaps) { <label><input type="checkbox" checked="@Settings.Current.GuardZoneMaps.Contains(map.Id)" @onchange="@(e => SetGuardMap(map.Id, e.Value is true))" />@map.Label</label> }</div><label for="guard-overlay-radius">@UiText.T("Radius")<input id="guard-overlay-radius" type="range" min="5" max="60" value="@Settings.Current.GuardRadiusMeters" @onchange="SetGuardRadius" /><output for="guard-overlay-radius">@Settings.Current.GuardRadiusMeters m</output></label><p>@UiText.T("Deine Fraktion legst du im Setup oder unter Optionen fest.")</p></section>
                     break;
                 case "daevanion":

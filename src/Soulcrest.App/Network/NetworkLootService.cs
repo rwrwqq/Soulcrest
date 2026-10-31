@@ -897,6 +897,7 @@ public sealed partial class NetworkLootService(ProgressService progress, Explora
                 var message = received.Data;
                 if (message.Length >= 2 && (message[0] == 0 && message[1] == 0x36 || message[0] == 1 && message[1] == 0x91))
                     BossMessageReceived?.Invoke(received.Stream, message);
+                ObserveHiddenCubeRecord(message);
             }
         }
     }

@@ -122,6 +122,7 @@ public sealed class MainForm : Form
                 { RarityAlerts = settings.LootDropRarityAlerts };
         }));
         services.AddSingleton<BossRushService>();
+        services.AddSingleton<LiveHiddenCubeService>();
         services.AddSingleton<AlertsService>();
         services.AddSingleton<AlertSoundPlayer>();
         services.AddSingleton<FarmedTargetCleaner>();
@@ -215,7 +216,8 @@ public sealed class MainForm : Form
             _services.GetRequiredService<MapTargetsService>(),
             _settings,
             _services.GetRequiredService<ProgressService>(),
-            _services.GetRequiredService<BossRushService>());
+            _services.GetRequiredService<BossRushService>(),
+            _services.GetRequiredService<LiveHiddenCubeService>()); // live Hidden Cube radar on the same minimap overlay
         _overlayInteractionTimer.Tick += (_, _) => UpdateOverlayInteractionState();
         OverlayInteraction.Changed += ScheduleOverlayInteraction;
         _placement = _services.GetRequiredService<OverlayPlacementService>();

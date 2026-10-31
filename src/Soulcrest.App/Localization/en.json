@@ -2207,5 +2207,17 @@
   "Eigene Skala: {0} bis {1}": "Independent scale: {0} to {1}",
   "Nur bei laufender Session anzeigen": "Show only during an active session",
   "Ohne laufende Session bleibt das Overlay ausgeblendet. Die Aufnahme läuft unabhängig davon weiter.": "Without an active session, the overlay stays hidden. Recording continues independently.",
-  "Kill-Icon": "Kill icon"
+  "Kill-Icon": "Kill icon",
+  "Live Cube Radar": "Live Cube Radar",
+  "Hidden Cubes live auf Minimap und Karte anzeigen": "Show Hidden Cubes live on the minimap and map",
+  "Erkennt Hidden Cubes in deiner Nähe über den mitgelesenen Netzwerkverkehr und zeigt sie mit Entfernung und Höhe auf demselben Overlay wie die Cube-Spots. Rot: sichtbar, orange gestrichelt: außer Sicht, gelb: wird geöffnet, grau: geöffnet oder weg.": "Detects Hidden Cubes near you from the passively read network traffic and shows them with distance and height on the same overlay as the cube spots. Red: visible, dashed orange: out of view, yellow: being opened, grey: opened or gone.",
+  "Alarmton bei jedem neuen Cube": "Alarm sound for every new cube",
+  "Benötigt das Netzwerk-Tracking (Npcap). Bestätigt in Verteron; in anderen Gebieten lernt das Radar die Cube-Kennung beim Öffnen mit einem Schlüssel oder an bekannten Cube-Spots selbst.": "Requires network tracking (Npcap). Confirmed in Verteron; in other areas the radar learns the cube ID itself when a cube is opened with a key or at known cube spots.",
+  "Live Cube Radar ist aus.": "Live Cube Radar is off.",
+  "Wartet auf das Netzwerk-Tracking.": "Waiting for network tracking.",
+  "{0} Cubes in Sicht, {1} außer Sicht · {2} bekannte Cube-Kennungen": "{0} cubes in view, {1} out of view · {2} known cube IDs",
+  "Für die aktuelle Karte fehlt die Umrechnung der Spielkoordinaten.": "The game coordinate conversion is missing for the current map.",
+  "wird geöffnet": "being opened",
+  "geöffnet": "opened",
+  "weg": "gone"
 }

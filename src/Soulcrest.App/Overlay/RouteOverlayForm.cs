@@ -27,11 +27,13 @@ public sealed partial class RouteOverlayForm : Form
     private readonly object _composeGate = new();
 
     private readonly ProgressService _progress;
+    private readonly LiveHiddenCubeService? _liveCubes;
     private readonly Dictionary<string, Bitmap?> _icons = [];
 
     public RouteOverlayForm(MapTrackingService tracking, MapTargetsService targets, SettingsService settings, ProgressService progress,
-        BossRushService bosses)
+        BossRushService bosses, LiveHiddenCubeService? liveCubes = null)
     {
+        _liveCubes = liveCubes;
         _progress = progress;
         _progress.Changed += PreparationChanged;
         _tracking = tracking;
@@ -49,6 +51,7 @@ public sealed partial class RouteOverlayForm : Form
         _targets.Changed += PreparationChanged;
         _settings.Changed += PreparationChanged;
         _bosses.Changed += BossTimersChanged;
+        if (_liveCubes is not null) _liveCubes.Changed += ScheduleInvalidated;
     }
 
     public void SetSuppressed(bool suppressed)
@@ -183,17 +186,20 @@ public sealed partial class RouteOverlayForm : Form
         var resources = VisibleSymbols(placement, prepared);
         ApplyTargetSymbols(resources, prepared);
         var guards = VisibleGuardZones(placement, prepared);
-        if (onMap.Count == 0 && pets.Count == 0 && resources.Count == 0 && souls.Count == 0 && guards is null && prepared.HiddenCubeGroups.Count == 0)
+        var liveCubes = _liveCubes?.CubesFor(placement.MapId) ?? [];
+        if (onMap.Count == 0 && pets.Count == 0 && resources.Count == 0 && souls.Count == 0 && guards is null && prepared.HiddenCubeGroups.Count == 0
+            && liveCubes.Count == 0)
             return null;
         var bossCounters = BossCounters(placement.MapId, _bosses.Schedule);
         return RenderFrame(placement, onMap, pets, resources, souls, guards, prepared.TargetIcons, prepared.HiddenCubeGroups,
-            OverlayThemeDefinition.Resolve(prepared.ThemeId), bossCounters);
+            OverlayThemeDefinition.Resolve(prepared.ThemeId), bossCounters, liveCubes);
     }
 
     internal static Frame RenderFrame(MapPlacement placement, IReadOnlyList<(MapTarget Target, int Index)> onMap,
         IReadOnlyList<PetSymbol> pets, IReadOnlyList<ResourceSymbol>? resources = null, IReadOnlyList<SoulMonster>? souls = null,
         GuardZones? guards = null, IReadOnlyDictionary<string, Bitmap?>? targetIcons = null, IReadOnlyList<HiddenCubeGroup>? hiddenCubeGroups = null,
-        OverlayThemeDefinition? theme = null, IReadOnlyDictionary<int, string>? bossCounters = null)
+        OverlayThemeDefinition? theme = null, IReadOnlyDictionary<int, string>? bossCounters = null,
+        IReadOnlyList<LiveCubeMarker>? liveCubes = null)
     {
         theme ??= OverlayThemeDefinition.Legacy;
         // Drawn straight into a GDI DIB section that UpdateLayeredWindow takes as it is: converting a
@@ -207,7 +213,7 @@ public sealed partial class RouteOverlayForm : Form
         {
             using var surface = new Bitmap(size.Width, size.Height, size.Width * 4, PixelFormat.Format32bppPArgb, bits);
             using var graphics = Graphics.FromImage(surface);
-            DrawInto(graphics, placement, onMap, pets, resources, souls, guards, targetIcons, hiddenCubeGroups, theme, bossCounters); // a new DIB is all zeros: transparent
+            DrawInto(graphics, placement, onMap, pets, resources, souls, guards, targetIcons, hiddenCubeGroups, theme, bossCounters, liveCubes); // a new DIB is all zeros: transparent
         }
         catch
         {
@@ -281,7 +287,7 @@ public sealed partial class RouteOverlayForm : Form
     private static void DrawInto(Graphics graphics, MapPlacement placement, IReadOnlyList<(MapTarget Target, int Index)> targets,
         IReadOnlyList<PetSymbol>? pets, IReadOnlyList<ResourceSymbol>? resources, IReadOnlyList<SoulMonster>? souls, GuardZones? guards,
         IReadOnlyDictionary<string, Bitmap?>? targetIcons, IReadOnlyList<HiddenCubeGroup>? hiddenCubeGroups, OverlayThemeDefinition theme,
-        IReadOnlyDictionary<int, string>? bossCounters)
+        IReadOnlyDictionary<int, string>? bossCounters, IReadOnlyList<LiveCubeMarker>? liveCubes = null)
     {
         var region = placement.Region;
         graphics.SmoothingMode = SmoothingMode.AntiAlias;
@@ -344,6 +350,7 @@ public sealed partial class RouteOverlayForm : Form
             else if (area.Contains(at))
                 DrawTargetRing(graphics, at, area, label, color, dashed, icon, theme, drawBackground); // world map of another zone: no player, rings only
         }
+        DrawLiveCubes(graphics, placement, origin, area, player, liveCubes ?? [], theme); // live radar on top of everything
     }
 
     internal static IReadOnlyDictionary<int, string> BossCounters(string map, IReadOnlyList<BossRushEntry> rows) =>
