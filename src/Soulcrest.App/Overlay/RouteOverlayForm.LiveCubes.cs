@@ -84,7 +84,7 @@ public sealed partial class RouteOverlayForm
         using var topBrush = new SolidBrush(Shade(color, 1.25f));
         using var leftBrush = new SolidBrush(Shade(color, 0.85f));
         using var rightBrush = new SolidBrush(Shade(color, 0.6f));
-        using var outline = new Pen(Color.FromArgb(Math.Min(255, color.A), 10, 10, 14), 1.4f) { LineJoin = LineJoin.Round };
+        using var outline = new Pen(Color.FromArgb(color.A, 10, 10, 14), 1.4f) { LineJoin = LineJoin.Round };
         if (status == HiddenCubeStatus.OutOfView)
         {
             // Not in view right now: only the outline, so it reads as "probably still there".
@@ -163,5 +163,5 @@ public sealed partial class RouteOverlayForm
     }
 
     private static Color Shade(Color color, float factor) => Color.FromArgb(color.A,
-        (int)Math.Clamp(color.R * factor, 0, 255), (int)Math.Clamp(color.G * factor, 0, 255), (int)Math.Clamp(color.B * factor, 0, 255));
+        (int)Math.Clamp(color.R * factor, 0f, 255f), (int)Math.Clamp(color.G * factor, 0f, 255f), (int)Math.Clamp(color.B * factor, 0f, 255f));
 }
